@@ -4,12 +4,15 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class StudentSystem {
+    public static final String NUMBER_AND_WORD = "^(?![A-Za-z]+$)(?!\\d+$)[A-Za-z0-9]{3,15}$";
+
     public static void main(String[] args) {
         Boolean isLogin = false;
         ArrayList<Student> list = new ArrayList();
         ArrayList<User> userArrayList = new ArrayList<>();
-        while (true){
-            if(isLogin){
+        while (true) {
+
+            if (isLogin) {
                 loop:
                 while (true) {
                     System.out.println("-----------欢迎来到学生管理系统-----------");
@@ -47,7 +50,7 @@ public class StudentSystem {
                             System.out.println("您输入的信息有误");
                     }
                 }
-            }else{
+            } else {
                 System.out.println("-----------欢迎登录学生管理系统-----------");
                 System.out.println("请选择操作");
                 System.out.println("1、登录");
@@ -59,7 +62,10 @@ public class StudentSystem {
                 String select = sc.next();
                 switch (select) {
                     case "1":
-                        login();
+                        boolean loginRes = login(userArrayList);
+                        if (loginRes) {
+                            isLogin = true;
+                        }
                         break;
                     case "2":
                         register(userArrayList);
@@ -76,21 +82,71 @@ public class StudentSystem {
 
     }
 
-    public static void login() {
+    public static boolean login(ArrayList<User> userArrayList) {
         System.out.println("登录");
+        Scanner sc = new Scanner(System.in);
+        System.out.println("请输入用户名");
+        String username = sc.next();
+        int userIndex = getUserIndex(userArrayList, username);
+        if (userIndex == -1) {
+            System.out.println("的用户名不存在！");
+            return false;
+        }
+
+        System.out.println("请输入密码");
+        String localPassword = sc.next();
+        User user = userArrayList.get(userIndex);
+        String password = user.getPassword();
+        if (!password.equals(localPassword)) {
+            System.out.println("账户或密码错误");
+            return false;
+        }
+        System.out.println("登录成功");
+        return true;
     }
-    public static void register(ArrayList<User> userList) {
+
+    public static boolean register(ArrayList<User> userList) {
+
         System.out.println("注册");
         Scanner sc = new Scanner(System.in);
         System.out.println("请输入用户名");
         String username = sc.next();
+        int userIndex = getUserIndex(userList, username);
+        if (userIndex != -1) {
+            System.out.println("您输入的用户名已存在");
+            return false;
+        }
+        String password = "";
+        loop:
+        while (true) {
+            System.out.println("请输入密码");
+            password = sc.next();
+            if (password.matches(NUMBER_AND_WORD)) {
+                break loop;
+            } else {
+                System.out.println("您的密码太简单了！请重新输入");
+            }
+        }
 
-
-        System.out.println("请输入密码");
         System.out.println("请输入再次输入密码");
+        String rePassword = sc.next();
+
+        if (!password.equals(rePassword)) {
+            System.out.println("注册失败！两次密码不一样");
+            return false;
+        }
         System.out.println("请输入身份证号码");
+        String idCard = sc.next();
         System.out.println("请输入手机号码");
+        String phone = sc.next();
+
+
+        User user = new User(username, rePassword, idCard, phone);
+        userList.add(user);
+        System.out.println("注册成功");
+        return true;
     }
+
     public static void forgetPassword() {
         System.out.println("忘记密码");
     }
@@ -99,7 +155,7 @@ public class StudentSystem {
 
         for (int i = 0; i < userArrayList.size(); i++) {
             User user = userArrayList.get(i);
-            if(user.getUsername().equals(username)){
+            if (user.getUsername().equals(username)) {
                 return i;
             }
         }
@@ -147,7 +203,7 @@ public class StudentSystem {
         String id = sc.next();
 
         int index = getIndex(list, id);
-        if(index >=0 ){
+        if (index >= 0) {
             Student student = list.get(index);
             System.out.println("请输入学生的姓名");
             String name = sc.next();
@@ -160,8 +216,8 @@ public class StudentSystem {
             student.setAddress(address);
 
             System.out.println("修改成功");
-        }else{
-            System.out.println("修改失败！没有"+id + "的学生");
+        } else {
+            System.out.println("修改失败！没有" + id + "的学生");
         }
     }
 
